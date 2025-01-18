@@ -88,10 +88,56 @@ def login():
 @app.route('/protected-data', methods=['GET'])
 @token_required
 def protected_data(current_user):
-    return jsonify({
-        'name': current_user.name,
-        'email': current_user.email
-    }), 200
+    # Fetch all users from the database
+    users = User.query.all()
+    
+    # Prepare a list of users' data
+    users_data = []
+    for user in users:
+        users_data.append({
+            'id': user.id,
+            'name': user.name,
+            'email': user.email
+        })
+
+    return jsonify({'users': users_data}), 200
+
+@app.route('/update/<int:id>', methods=['PUT'])
+@token_required
+def update_user(current_user, id):
+    # Find the user by id
+    user = User.query.get(id)
+    if not user:
+        return jsonify({'message': 'User not found!'}), 404
+
+    # Update user data
+    data = request.get_json()
+    name = data.get('name')
+    email = data.get('email')
+
+    if name:
+        user.name = name
+    if email:
+        user.email = email
+
+    # Commit the changes to the database
+    db.session.commit()
+
+    return jsonify({'message': 'User data updated successfully!'}), 200
+
+@app.route('/delete/<int:id>', methods=['DELETE'])
+@token_required
+def delete_user(current_user, id):
+    # Find the user by id
+    user = User.query.get(id)
+    if not user:
+        return jsonify({'message': 'User not found!'}), 404
+
+    # Delete the user
+    db.session.delete(user)
+    db.session.commit()
+
+    return jsonify({'message': 'User deleted successfully!'}), 200
 
 # Run the Flask app
 if __name__ == '__main__':
