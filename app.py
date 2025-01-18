@@ -4,6 +4,7 @@ from flask_bcrypt import Bcrypt
 import jwt
 from datetime import datetime, timedelta
 from functools import wraps
+import os
 
 # Flask app and configuration
 app = Flask(__name__)
